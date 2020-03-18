@@ -9,51 +9,51 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
-#define FILENAME "/remotehomes/erik.safford/Documents/CS360/assign2/webster" //File for SIZE dictionary
+#define FILENAME "/home/erik/Desktop/Dictionary-Search/webster" //File for SIZE dictionary
 #define SIZE 16 //number of bytes per word line entry of the dictionary file (including null term/newline)
-#define DEBUG 1 //Debug print statements, 0 = OFF, 1 = ON
+#define DEBUG 0 //Debug print statements, 0 = OFF, 1 = ON
 
 //Check if the word we want is in the dictionary
 int check(int fd,char *want) {
 	char have[SIZE]; //Buffer to hold a word entry line from the dictionary
-        int bot = 0;
-        int top = 0; //Keep track of bot,top,mid for Binary Search
-        int mid;
+    int bot = 0;
+    int top = 0; //Keep track of bot,top,mid for Binary Search
+    int mid;
 
 	//Determine how many lines there are in the file (# word entries)
 	if(fd < 0) {  //Exit if couldnt open the dictionary
-        	fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                exit(1);
-        }
+        fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
+        exit(1);
+    }
 	int bytes = lseek(fd,0,SEEK_END); //Find total bytes in file
 	if(bytes <= 0) { //If bytes can't be read from file for some reason
 		fprintf(stderr,"No bytes can be read from file.\n");
-                exit(1);
+        exit(1);
 	}
 	top = bytes / SIZE;  //Divide by SIZE to find # of lines (top)
 	if(bytes % SIZE != 0) { //If total bytes didnt divide evenly by SIZE
 		fprintf(stderr,"Words in file incorrectly formatted.\n");
-                exit(1);
+        exit(1);
 	}
 	int closed = close(fd);
-        if(closed != 0) { //If file did not close properly
-                fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                exit(1);
-        }
+	if(closed != 0) { //If file did not close properly
+		fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
+		exit(1);
+	}
 
 	if(DEBUG == 1) {printf("word wanted=\"%s\"\n",want);}
 
-	while(7 == 7) {  //Infinite loop, Uses binary search to search for matching word
-		         //Returns 0 if word can't be found, 1 if word found
+	while(7 == 7) { //Infinite loop, Uses binary search to search for matching word
+		         	//Returns 0 if word can't be found, 1 if word found
 		if(DEBUG == 1) {printf("search range: bottom=%d, top=%d\n",bot,top);}
 
 		int fd2 = open(FILENAME,O_RDONLY);
 		if(fd2 < 0) {  //Exit if cant open the dictionary
-                	fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                	exit(1);
-        	}
+            fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
+            exit(1);
+        }
 
-		if(bot >= top) {    //If we've searched through the whole dictionary and cant find the word
+		if(bot >= top) {  //If we've searched through the whole dictionary and cant find the word
 			return(0);  //Return word not found in dictionary
 		}
 		mid = (bot + top) / 2;         //Find middle line of current search
@@ -61,12 +61,12 @@ int check(int fd,char *want) {
 		int seeked = lseek(fd2,bitShift,SEEK_SET);  //Go to the middle line
 		if(seeked == -1) { //If error offsetting in file
 			fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                        exit(1);
+            exit(1);
 		}
 		int bytesRead = read(fd2,have,SIZE-1); //Read the word from that line
 		if(bytesRead < 0) { //If we can't read from file for some reason
 			fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                        exit(1);
+            exit(1);
 		}
 		if(DEBUG == 1) {printf("middle=%d, word have=\"%s\"\n",mid,have);}
 
@@ -85,15 +85,16 @@ int check(int fd,char *want) {
 		}
 		closed = close(fd2);
 		if(closed != 0) { //If file did not close properly
-                	fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
-                	exit(1);
-        	}
+            fprintf(stderr,"err=%d: %s\n",errno,strerror(errno));
+            exit(1);
+        }
 	}
 }
 
 int main(int argc,char **argv) {
 	if(argc != 2) { //Exit if command line isnt correct
-		fprintf (stderr,"Invalid number of command line args\n"); 
+		fprintf(stderr,"Invalid number of command line args\n"); 
+		fprintf(stderr,"Format is: ./ok \"wordToSearch\"\n");
 		//No errno for invalid argc
 		exit(1);
 	}
